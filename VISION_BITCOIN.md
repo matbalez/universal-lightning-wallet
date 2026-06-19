@@ -63,38 +63,42 @@ wallet connections. It should be exposed as an explicit wallet capability, while
 BOLT 12 remains the durable receive target and data model for Buzz-native
 payments.
 
-BOLT 12 also does not make a powered-down Lightning node receivable by itself. In
-this document, an **offline recipient** means the person's Buzz client or phone is
-offline while their self-custodial Lightning node remains available to negotiate
-and settle the payment.
+BOLT 12 also does not make a powered-down wallet receivable by itself. In this
+document, an **offline recipient** means the person's Buzz client or phone is
+offline while their wallet infrastructure remains available to negotiate and
+settle the payment.
 
 ---
 
-## Hard Requirements of a Lightning Wallet in Buzz
+## Hard Requirements of a Buzz Bitcoin Wallet
 
 The first version has four non-negotiable requirements.
 
-### 1. Every user has a self-custodial wallet by default
+### 1. Every user has a wallet by default
 
 Buzz must be able to programmatically create an embedded wallet during onboarding.
-Self-custody is judged by control and recovery, not by a marketing label:
+Self-custody is the preferred default where practical, but compatibility is judged
+by control, recovery, transparency, and product safety rather than by a marketing
+label:
 
-- Buzz, the relay operator, and the wallet provider cannot extract the keys or
-  unilaterally spend the funds.
-- Wallet secrets are never sent to or stored by the Buzz relay.
+- Buzz and the relay operator cannot custody user funds, extract wallet secrets,
+  or unilaterally spend.
+- Wallet secrets and spend-authority credentials are never sent to or stored by
+  the Buzz relay.
 - Any code that exercises the keys is explicitly authorized by the user and runs
-  inside a security boundary the user can audit or verify meaningfully.
-- Backup and recovery are part of onboarding.
-- The user can inspect their seed phrase in wallet settings; it is hidden by default.
-- The user can restore, migrate, close, or recover the wallet without depending on
-  Buzz continuing to exist.
+  inside a stated security and trust model.
+- Backup, recovery, withdrawal, or exit are part of onboarding.
+- If the wallet exposes user-held recovery material, the user can inspect it in
+  wallet settings; it is hidden by default.
+- The user can restore, migrate, withdraw, close, or recover as supported by the
+  provider without depending on Buzz continuing to exist.
 - The wallet supports basic account operations, including reading the current
   balance and listing recent transactions.
 
-A service may host the user's always-online Lightning node. Hosting is compatible
-with self-custody when the operator cannot extract the keys or spend, and the user
-has an independent recovery path. The trust and hardware assumptions must be stated
-plainly.
+A service may host the user's always-online Lightning node or provide other
+payment infrastructure. Hosted, federated, or custodial components are compatible
+with Buzz only when the trust assumptions are stated plainly, the user has a
+practical exit path, and Buzz itself never becomes the custodian.
 
 ### 2. BOLT 12 is the core send and receive primitive
 
@@ -191,16 +195,16 @@ Humans · Agents · Workflows · Product features
        +------------+-------------+
                     |
                     v
-       User-controlled Lightning wallet
+       User-selected Bitcoin wallet/provider
                     |
                     v
              Lightning Network
 ```
 
-The capability layer needs provider-neutral operations for provisioning and
-restoring a wallet, discovering capabilities, creating and paying offers, quoting
+The capability layer needs provider-neutral operations for provisioning or
+connecting a wallet, discovering capabilities, creating and paying offers, quoting
 fees, reading balance and payment state, subscribing to payment events, exporting
-recovery material, and closing the wallet safely.
+recovery or exit material where applicable, and closing the wallet safely.
 
 Product code calls those capabilities. It should not care whether the wallet runs
 locally, in remotely attested secure hardware, through an embedded SDK, or behind a
@@ -222,12 +226,12 @@ capabilities.
 
 | Area | Expectation |
 |---|---|
-| **Custody** | No operator can extract keys or unilaterally spend user funds. |
+| **Custody** | Buzz never custodies funds or receives spend authority; provider custody and trust assumptions are explicit. |
 | **Provisioning** | A client can create a separate wallet for each user without manual operator work. |
 | **BOLT 12** | Create offers, pay offers, receive repeatedly, and support blinded paths. |
 | **Offline client receive** | The wallet settles while the user's Buzz client is offline. |
 | **Small payments** | New users can receive small amounts without manual channel or liquidity management. |
-| **Recovery** | Users can independently recover or exit if Buzz or the provider disappears. |
+| **Recovery** | Users have a documented recovery, withdrawal, or exit path that does not depend on Buzz. |
 | **Security** | Key storage, signing, remote execution, and update trust are documented and auditable. |
 | **Open implementation** | The default provider should be open source; reproducible builds and remote attestation are strongly preferred for hosted secure execution. |
 | **SDK quality** | Versioned APIs, structured errors, test environments, and support for Buzz client platforms. |
@@ -245,9 +249,10 @@ BOLT 12 feature to a flow with different privacy, trust, or availability.
 ## Initial Provider: Lexe
 
 At the time of writing, Lexe is the only known wallet SDK that appears to satisfy
-all four initial requirements together:
+all four initial requirements together while also matching the preferred
+self-custody model:
 
-- programmatic creation of self-custodial wallets;
+- programmatic wallet creation with user-controlled recovery;
 - an always-online Lightning node for each user;
 - BOLT 12 offer creation and payment;
 - receipt while the user's application is offline;
