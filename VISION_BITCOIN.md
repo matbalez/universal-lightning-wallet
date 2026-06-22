@@ -260,26 +260,6 @@ See the video walkthroughs here:
 
 ---
 
-## Agents With Money
-
-Agents make native payments more powerful and more dangerous.
-
-An agent must never receive the user's root seed merely because it can call Buzz
-tools. Agents spend through revocable capabilities with explicit policy:
-
-- maximum amount per payment;
-- maximum total amount over a time window;
-- permitted recipients, projects, tools, or purposes;
-- fee limits and expiration;
-- human approval above a threshold;
-- whether the agent may delegate authority;
-- whether incoming funds belong to the agent, its owner, or a project.
-
-Buzz already has workflows, approval gates, identities, and an audit trail. Those
-primitives should govern agent payments too.
-
----
-
 ## Identity and Discoverability
 
 Buzz identity and Lightning identity should compose without becoming the same
