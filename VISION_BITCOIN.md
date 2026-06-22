@@ -18,12 +18,7 @@ Buzz should make transmitting value a native part of building together.
 Bitcoin is internet-native digital money implemented as an open protocol. It does
 not require Buzz to issue a token, run a closed ledger, or make users dependent on
 a payment platform. Open-source money belongs beside open-source software,
-open-source communications, and open-source intelligence.
-
-The Lightning Network makes Bitcoin useful for small, fast payments. BOLT 12 makes
-Lightning a better fit for Buzz: reusable offers, payer-specific invoices,
-Lightning-native negotiation, blinded paths, and less dependence on web services
-and trusted intermediaries.
+open-source communications, and open-source intelligence. 
 
 The goal:
 
@@ -33,7 +28,55 @@ they use messages, reactions, tools, and workflows.**
 
 ---
 
-## The Core Primitive
+## Value as a Product Primitive
+
+Once every Buzz user is bestowed a bitcoin Lightning wallet, value can flow in the product experience in all kinds of new and intresting ways. 
+
+### Appreciation and attention
+
+- Tip a message, person, agent, project, patch, or document.
+- Add sats to kudos without replacing its social meaning.
+- Attach a reward to a question or request.
+- Fund a bounty directly from an issue or branch channel.
+- Let a user publish a price for priority attention or specialized work.
+- Let an opt-in channel require a small payment for high-volume unsolicited actions.
+
+### Access to resources
+
+- Pay to unlock a private file, dataset, document, or channel.
+- Pay per model inference, API request, search, build minute, or compute job.
+- Let an agent buy a tool call or data source while completing a task.
+- Sell access to a research feed or specialized agent.
+- Pay for a temporary capability instead of creating another subscription account.
+
+A payment receipt can satisfy an access policy. The relay coordinates the action;
+it does not custody the money.
+
+### Build and earn together
+
+- Pay contributors when a patch is approved or a release ships.
+- Split revenue among people, agents, maintainers, and project funds.
+- Let workflows turn approved outcomes into payouts.
+- Let projects earn from artifacts, support, data, compute, or services.
+- Give humans and agents persistent economic identities and earning histories.
+
+The long-term result is a workspace where people and agents discover work, perform
+it, prove it, approve it, and get paid in the same shared context.
+
+---
+
+## Prototype
+
+A prototype Buzz client was created that integrates a lightning wallet that bring to life many of the feature ideas above.
+
+Video walkthroughs of the prototype client:
+
+- [Bitcoin in Buzz (née Sprout) — initial feature exploration](https://www.loom.com/share/f9323cfde3a7419ab82a8efdfa5282f3)
+- [Bitcoin in Buzz — hive channels](https://www.loom.com/share/ebfcf339dcb2431aa3a40ba242145437)
+
+---
+
+## BOLT12: The Payment Primitive
 
 Early Lightning applications were built around BOLT 11 invoices and LNURL. They
 proved the demand, but they are a poor foundation for Buzz's native experience.
@@ -52,9 +95,9 @@ For Buzz, BOLT 12 is the core primitive, giving a person, agent, project, channe
 
 ---
 
-## Hard Requirements of a Buzz Bitcoin Wallet
+## Requirements 
 
-The first version has four non-negotiable requirements.
+The first version of a bitcoin Lightning wallet in Buzz has four hard requirements.
 
 ### 1. Every user has a wallet by default
 
@@ -184,112 +227,20 @@ identify the provider and its security model clearly. The user can choose anothe
 compatible provider when available, opt out, and later migrate. A relay
 recommendation never gives the relay access to wallet credentials.
 
-A default is an onboarding decision, not an architecture decision.
-
----
-
-## Initial Provider: Lexe
-
-At the time of writing, Lexe is the only known wallet SDK that appears to satisfy
-all four initial requirements together while also matching the preferred
-self-custody model:
-
-- programmatic wallet creation with user-controlled recovery;
-- an always-online Lightning node for each user;
-- BOLT 12 offer creation and payment;
-- receipt while the user's application is offline;
-- managed liquidity for small incoming payments;
-- open-source node and SDK code with a documented secure-enclave and recovery model.
-
-Buzz should integrate the Lexe SDK first.
-
-That is a starting point, not an endorsement carved into the architecture. The Lexe
-adapter must sit behind the same provider-neutral layer future wallets use.
-Lexe-specific credentials, types, fees, and lifecycle assumptions remain inside the
-adapter.
-
----
-
-## Value as a Product Primitive
-
-The first milestone is a working wallet. The reason to build it is everything the
-wallet makes possible. 
-
-### Appreciation and attention
-
-- Tip a message, person, agent, project, patch, or document.
-- Add sats to kudos without replacing its social meaning.
-- Attach a reward to a question or request.
-- Fund a bounty directly from an issue or branch channel.
-- Let a user publish a price for priority attention or specialized work.
-- Let an opt-in channel require a small payment for high-volume unsolicited actions.
-
-### Access to resources
-
-- Pay to unlock a private file, dataset, document, or channel.
-- Pay per model inference, API request, search, build minute, or compute job.
-- Let an agent buy a tool call or data source while completing a task.
-- Sell access to a research feed or specialized agent.
-- Pay for a temporary capability instead of creating another subscription account.
-
-A payment receipt can satisfy an access policy. The relay coordinates the action;
-it does not custody the money.
-
-### Build and earn together
-
-- Pay contributors when a patch is approved or a release ships.
-- Split revenue among people, agents, maintainers, and project funds.
-- Let workflows turn approved outcomes into payouts.
-- Let projects earn from artifacts, support, data, compute, or services.
-- Give humans and agents persistent economic identities and earning histories.
-
-The long-term result is a workspace where people and agents discover work, perform
-it, prove it, approve it, and get paid in the same shared context.
-
----
-
-## Prototype
-
-A prototype Buzz client was created that integrates a wallet provider layer with
-Lexe as the default embedded wallet exploring many of the feature ideas above.
-
-See the video walkthroughs here:
-
-- [Bitcoin in Buzz (née Sprout) — initial feature exploration](https://www.loom.com/share/f9323cfde3a7419ab82a8efdfa5282f3)
-- [Bitcoin in Buzz — hive channels](https://www.loom.com/share/ebfcf339dcb2431aa3a40ba242145437)
-
----
-
-## Identity and Discoverability
-
-Buzz identity and Lightning identity should compose without becoming the same
-thing. A user's Nostr public key is meant to be visible. Their balance,
-counterparties, payment history, and Lightning node identity are not.
-
-Offer discovery is a Buzz concern. Payment execution is a wallet concern.
-
-Once every user has a wallet that can immediately receive Bitcoin, Buzz's
-protocol surface stays small: broadcast and discover users' BOLT 12 offers on
-Nostr as profile metadata. A forthcoming NIP will specify this receive metadata,
-letting product features compose on top of the same stable receive primitive. 
-
-A forthcoming NIP will also specify a BOLT 12-based zap protocol that replaces
-NIP-57's LNURL-based zap mechanism without adding new trust assumptions.
-
 ---
 
 ## Sequence
 
-### Phase 1 — The wallet
+### Phase 1 — Establish the wallet
 
 - Define the provider-neutral capability layer and acceptance suite.
-- Build the Lexe adapter.
+- Select a first embedded wallet SDK to build upon.
 - Ship wallet creation, backup, restore, close, and recovery.
 - Create and pay BOLT 12 offers.
 - Receive while the Buzz client is offline.
 - Show balances, payment state, fees, and useful failures.
 
-### Phase 2 — Value in the room
+### Phase 2 — Create product value
 
 - Tip people, agents, and messages.
 - Attach rewards and bounties to requests, issues, and branch channels.
@@ -298,14 +249,11 @@ NIP-57's LNURL-based zap mechanism without adding new trust assumptions.
 - Add monetized channels.
 - Add channel contributor payouts and revenue splits.
 
-### Phase 3 — Wallet choice
+### Phase 3 — Enable wallet choice
 
 - Adopt a BOLT 12-capable wallet connection standard once it is ready and adopted.
 - Add more embedded providers through the same adapter boundary.
 - Make provider migration and wallet exit routine.
-
-Each phase should be useful on its own. The first shipped feature should not require
-the final economy to exist.
 
 ---
 
