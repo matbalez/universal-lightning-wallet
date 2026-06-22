@@ -276,6 +276,53 @@ duplicate-request safety, fee limits, recovery, and provider failure.
 
 ---
 
+## Future Potential Providers
+
+Lexe is the initial provider because it is the first known SDK that satisfies the
+full starting requirement set. It should not become the only path. Other providers
+can be added when they satisfy the same provider-neutral capability checks and make
+their custody, liquidity, availability, and recovery assumptions explicit.
+
+### Bark
+
+Second Tech's layer 2 Ark technology, Bark, recently launched on mainnet. Once it
+adds BOLT 12 support, which Second Tech has indicated is coming, Bark could become
+an embedded wallet option that ticks all of Buzz's required boxes. That would
+introduce some degree of trust in the Ark server, so Buzz would need to expose that
+trust model clearly rather than presenting it as equivalent to a self-custodial
+Lightning node.
+
+### Spark
+
+Similarly, if Buzz is willing to introduce some degree of trust in Spark servers,
+Lightspark's Spark could become an embedded wallet option if it ever adds BOLT 12
+support. There is no known indication yet that it will do so.
+
+### Cashu
+
+As an ecash protocol on top of Bitcoin, Cashu could work as an embedded wallet in
+Buzz. At the time of writing, there are only two known mints that support BOLT 12,
+and their reliability as custodians of real user funds cannot be vouched for.
+
+### Phoenixd
+
+A phoenixd process running on a server the user trusts could be an option if
+hosting could be made simple enough. It would not support receiving small amounts
+out of the gate, so inbound liquidity and first-receive behavior would need to be
+solved before it could satisfy the core wallet requirements.
+
+### LDK
+
+Similarly, an LDK wallet running on a server the user trusts could work, but
+receiving small amounts and liquidity more generally still need to be figured out.
+
+### MDK Agent Wallet
+
+MoneyDevKit's Agent Wallet, built on LDK, supports BOLT 12 but needs somewhere
+persistent to run.
+
+---
+
 ## Value as a Product Primitive
 
 The first milestone is a working wallet. The reason to build it is everything the
@@ -356,6 +403,14 @@ A profile may advertise a general offer. A private channel may distribute a scop
 offer only to members. A paid resource may create a purpose-specific offer. The
 exact Nostr event schema will be documented in a separate NIP.
 
+Once the embedded wallet requirements are met, especially the requirement that
+every user has a BOLT 12 wallet that can immediately receive Bitcoin, Buzz's
+protocol surface stays small: broadcast and discover users' BOLT 12 offers on
+Nostr as profile metadata. A forthcoming NIP will specify this receive metadata,
+letting product features compose on top of the same stable receive primitive. A
+forthcoming NIP will also specify a BOLT 12-based zap protocol that replaces
+NIP-57's LNURL-based zap mechanism without adding new trust assumptions.
+
 ---
 
 ## Sequence
@@ -405,6 +460,41 @@ Open-source software. Open-source communications. Open-source intelligence.
 Open-source money.
 
 Value moves with the work.
+
+---
+
+## FAQ
+
+### Why Bitcoin and not stablecoins?
+
+Bitcoin is internet-native money that introduces the least amount of trust in
+third parties and the lowest cost for transfers of tiny amounts. Stablecoins
+require trust in the stablecoin issuer and in the crypto rails on which the
+stablecoins are sent and received. With Bitcoin, particularly through a
+self-custodial wallet, users can know their funds are their own instead of a claim
+on an issuer.
+
+### Why not Lightning Address / LNURL?
+
+LNURL gives Lightning users a Lightning Address: a stable address at which they
+can receive Bitcoin. That is useful, but it requires a web server and usually
+introduces another third party to operate, observe, or be trusted in the receive
+flow.
+
+BOLT 12 is a trustless way to achieve a stable receive identifier. Several Nostr
+clients have already built Lightning payment experiences with LNURL. Buzz should
+build around the more trustless BOLT 12 architecture from the beginning.
+
+### Why Lexe?
+
+Lexe was chosen as the initial embedded wallet provider because it meets the core
+starting requirements: an SDK with BOLT 12 send, BOLT 12 receive, small incoming
+payment support, and receive while the user's Buzz client is offline.
+
+As more embedded wallet alternatives become feasible, they should be added as
+user-selectable options in Buzz. Once a wallet connection protocol exists that
+lets users connect an existing wallet with the same capabilities, Buzz should
+support that too.
 
 ---
 
