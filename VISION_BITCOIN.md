@@ -498,6 +498,22 @@ support that too.
 
 ---
 
+## Prototype
+
+A prototype Buzz client was created that integrates a wallet provider layer with
+Lexe as the default embedded wallet, while also experimenting with Cashu and MDK
+wallets. As this vision document argues, the prototype uses BOLT 12 as the core
+primitive to demonstrate product features where value, in the form of small
+amounts of Bitcoin, can flow alongside work in Buzz.
+
+The prototype walkthroughs were put together by Spiral PM
+[matbalez](https://github.com/matbalez):
+
+- [Bitcoin in Buzz (née Sprout) — initial feature exploration](https://www.loom.com/share/f9323cfde3a7419ab82a8efdfa5282f3)
+- [Bitcoin in Buzz — hive channels](https://www.loom.com/share/ebfcf339dcb2431aa3a40ba242145437)
+
+---
+
 ## References
 
 - [Buzz platform vision](VISION.md)
