@@ -76,7 +76,7 @@ Video walkthroughs of the prototype client:
 
 ---
 
-## BOLT12: The Payment Primitive
+## BOLT12: The Right Lightning Payment Protocol
 
 Early Lightning applications were built around BOLT 11 invoices and LNURL. They
 proved the demand, but they are a poor foundation for Buzz's native experience.
@@ -91,7 +91,7 @@ reusable **offer**. A payer uses it to request a unique invoice through Lightnin
 onion messages, then pays it. Blinded paths can hide the recipient's node identity.
 Signed, extensible messages provide better proofs and room for protocol evolution.
 
-For Buzz, BOLT 12 is the core primitive, giving a person, agent, project, channel, or resource a durable way to receive.
+For Buzz, BOLT 12 is the core payment primitive, giving a person, agent, project, channel, or resource a durable way to receive.
 
 ---
 
