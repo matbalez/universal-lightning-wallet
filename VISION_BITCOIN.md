@@ -48,25 +48,7 @@ reusable **offer**. A payer uses it to request a unique invoice through Lightnin
 onion messages, then pays it. Blinded paths can hide the recipient's node identity.
 Signed, extensible messages provide better proofs and room for protocol evolution.
 
-For Buzz, BOLT 12 is the core primitive:
-
-- A person, agent, project, channel, or resource can have a durable way to receive.
-- A sender can include an amount and payment context without depending on a
-  recipient-operated HTTP endpoint.
-- Offers can be scoped and rotated for different relationships or purposes.
-- The payment protocol stays independent of Buzz and of the selected wallet
-  provider.
-
-BOLT 11 remains a required compatibility rail for external Lightning protocols
-that still depend on invoices, including L402/HTTP 402 paid resources and legacy
-wallet connections. It should be exposed as an explicit wallet capability, while
-BOLT 12 remains the durable receive target and data model for Buzz-native
-payments.
-
-BOLT 12 also does not make a powered-down wallet receivable by itself. In this
-document, an **offline recipient** means the person's Buzz client or phone is
-offline while their wallet infrastructure remains available to negotiate and
-settle the payment.
+For Buzz, BOLT 12 is the core primitive, giving a person, agent, project, channel, or resource a durable way to receive.
 
 ---
 
@@ -83,11 +65,6 @@ label:
 
 - Buzz and the relay operator cannot custody user funds, extract wallet secrets,
   or unilaterally spend.
-- Wallet secrets and spend-authority credentials are never sent to or stored by
-  the Buzz relay.
-- Any code that exercises the keys is explicitly authorized by the user and runs
-  inside a stated security and trust model.
-- Backup, recovery, withdrawal, or exit are part of onboarding.
 - If the wallet exposes user-held recovery material, the user can inspect it in
   wallet settings; it is hidden by default.
 - The user can restore, migrate, withdraw, close, or recover as supported by the
@@ -107,7 +84,6 @@ A wallet provider must support both sides of the BOLT 12 flow:
 - create reusable offers, including amountless offers where appropriate;
 - pay offers;
 - receive repeated payments to an offer;
-- support blinded paths;
 - carry payer messages or payment context where supported;
 - report payment state and fees reliably.
 
@@ -116,8 +92,6 @@ them. Provider-specific node IDs, credentials, and API objects stay behind the
 wallet adapter.
 
 ### 3. Users can send and receive small amounts immediately
-
-"Immediately" means useful without manual Lightning operations.
 
 A new wallet must be able to receive a small payment without asking the user to
 open a channel, find inbound liquidity, wait for manual node setup, or keep the app
@@ -134,21 +108,16 @@ cannot economically move a few sats cannot support this vision.
 
 ### 4. Users can send to recipients whose clients are offline
 
-The recipient must not need to keep Buzz open, keep a phone awake, approve the
-incoming payment, or operate a separate signer or watchtower.
+The recipient must not need to keep Buzz open.
 
 Their wallet infrastructure must remain able to respond to BOLT 12 invoice
-requests, settle incoming payments, persist state safely, and notify Buzz when the
-client returns.
+requests, settle incoming payments, persist state safely.
 
 Messages are asynchronous. Value attached to messages must be asynchronous too.
 
 ---
 
 ## Future requirement: Connecting an Existing Wallet to Buzz
-
-The embedded wallet solves onboarding. It must not become a permanent wall around
-the user.
 
 5. **A user can connect an existing wallet and retain BOLT 12 send and receive,
    small-payment support, and receipt while the Buzz client is offline.**
@@ -170,7 +139,7 @@ and payment, asynchronous notifications, fee limits, idempotent requests, and
 revocable scoped permissions. Connection keys should remain separate from the
 user's main Nostr identity.
 
-Buzz should integrate one protocol, then gain access to every compatible wallet. It
+Buzz should integrate one connection protocol, then gain access to every compatible wallet. It
 should not write a bespoke remote integration for every wallet forever.
 
 ---
@@ -219,33 +188,6 @@ A default is an onboarding decision, not an architecture decision.
 
 ---
 
-## Requirements for Embedded Wallet SDKs
-
-Embedded wallet SDKs are evaluated against observable behavior and integration
-capabilities.
-
-| Area | Expectation |
-|---|---|
-| **Custody** | Buzz never custodies funds or receives spend authority; provider custody and trust assumptions are explicit. |
-| **Provisioning** | A client can create a separate wallet for each user without manual operator work. |
-| **BOLT 12** | Create offers, pay offers, receive repeatedly, and support blinded paths. |
-| **Offline client receive** | The wallet settles while the user's Buzz client is offline. |
-| **Small payments** | New users can receive small amounts without manual channel or liquidity management. |
-| **Recovery** | Users have a documented recovery, withdrawal, or exit path that does not depend on Buzz. |
-| **Security** | Key storage, signing, remote execution, and update trust are documented and auditable. |
-| **Open implementation** | The default provider should be open source; reproducible builds and remote attestation are strongly preferred for hosted secure execution. |
-| **SDK quality** | Versioned APIs, structured errors, test environments, and support for Buzz client platforms. |
-| **Correctness** | Idempotency, fee limits, terminal states, and reliable payment synchronization. |
-| **Privacy** | No unnecessary linkage between social identity, node identity, and payment history. |
-| **Economics** | Hosting, liquidity, routing, and service fees are transparent. |
-| **Portability** | Provider-specific assumptions remain behind the adapter. |
-
-Capabilities should be discovered at runtime. Buzz should fail closed when a
-provider lacks a property required by a feature. It should not silently downgrade a
-BOLT 12 feature to a flow with different privacy, trust, or availability.
-
----
-
 ## Initial Provider: Lexe
 
 At the time of writing, Lexe is the only known wallet SDK that appears to satisfy
@@ -266,67 +208,12 @@ adapter must sit behind the same provider-neutral layer future wallets use.
 Lexe-specific credentials, types, fees, and lifecycle assumptions remain inside the
 adapter.
 
-The root seed must be created and controlled by the user's client, not a shared Buzz
-backend. Buzz must never log or relay it. Recovery must be tested as a product flow
-before users are encouraged to fund the wallet.
-
-The adapter should pass a provider-independent acceptance suite covering wallet
-creation, restore, small first receive, offline-client receive, BOLT 12 payment,
-duplicate-request safety, fee limits, recovery, and provider failure.
-
----
-
-## Future Potential Providers
-
-Lexe is the initial provider because it is the first known SDK that satisfies the
-full starting requirement set. It should not become the only path. Other providers
-can be added when they satisfy the same provider-neutral capability checks and make
-their custody, liquidity, availability, and recovery assumptions explicit.
-
-### Bark
-
-Second Tech's layer 2 Ark technology, Bark, recently launched on mainnet. Once it
-adds BOLT 12 support, which Second Tech has indicated is coming, Bark could become
-an embedded wallet option that ticks all of Buzz's required boxes. That would
-introduce some degree of trust in the Ark server, so Buzz would need to expose that
-trust model clearly rather than presenting it as equivalent to a self-custodial
-Lightning node.
-
-### Spark
-
-Similarly, if Buzz is willing to introduce some degree of trust in Spark servers,
-Lightspark's Spark could become an embedded wallet option if it ever adds BOLT 12
-support. There is no known indication yet that it will do so.
-
-### Cashu
-
-As an ecash protocol on top of Bitcoin, Cashu could work as an embedded wallet in
-Buzz. At the time of writing, there are only two known mints that support BOLT 12,
-and their reliability as custodians of real user funds cannot be vouched for.
-
-### Phoenixd
-
-A phoenixd process running on a server the user trusts could be an option if
-hosting could be made simple enough. It would not support receiving small amounts
-out of the gate, so inbound liquidity and first-receive behavior would need to be
-solved before it could satisfy the core wallet requirements.
-
-### LDK
-
-Similarly, an LDK wallet running on a server the user trusts could work, but
-receiving small amounts and liquidity more generally still need to be figured out.
-
-### MDK Agent Wallet
-
-MoneyDevKit's Agent Wallet, built on LDK, supports BOLT 12 but needs somewhere
-persistent to run.
-
 ---
 
 ## Value as a Product Primitive
 
 The first milestone is a working wallet. The reason to build it is everything the
-wallet makes possible, such as the themes and illustrative examples below.
+wallet makes possible. 
 
 ### Appreciation and attention
 
@@ -336,9 +223,6 @@ wallet makes possible, such as the themes and illustrative examples below.
 - Fund a bounty directly from an issue or branch channel.
 - Let a user publish a price for priority attention or specialized work.
 - Let an opt-in channel require a small payment for high-volume unsolicited actions.
-
-Payment is one signal among many. Reputation, membership, context, and human
-judgment still matter. Gratitude must not become a pay-to-participate rule.
 
 ### Access to resources
 
@@ -364,6 +248,18 @@ it, prove it, approve it, and get paid in the same shared context.
 
 ---
 
+## Prototype
+
+A prototype Buzz client was created that integrates a wallet provider layer with
+Lexe as the default embedded wallet exploring many of the feature ideas above.
+
+See the video walkthroughs here:
+
+- [Bitcoin in Buzz (née Sprout) — initial feature exploration](https://www.loom.com/share/f9323cfde3a7419ab82a8efdfa5282f3)
+- [Bitcoin in Buzz — hive channels](https://www.loom.com/share/ebfcf339dcb2431aa3a40ba242145437)
+
+---
+
 ## Agents With Money
 
 Agents make native payments more powerful and more dangerous.
@@ -384,31 +280,20 @@ primitives should govern agent payments too.
 
 ---
 
-## Identity, Events, and Privacy
+## Identity and Discoverability
 
 Buzz identity and Lightning identity should compose without becoming the same
 thing. A user's Nostr public key is meant to be visible. Their balance,
 counterparties, payment history, and Lightning node identity are not.
 
-- Do not store seeds, balances, preimages, or complete payment histories on the
-  Buzz relay.
-- Support scoped and rotatable offers when correlation matters.
-- Put only the minimum product-relevant payment state into Buzz events.
-- Encrypt payment intents and receipts when the collaboration context is private.
-- Avoid public financial graphs or leaderboards by default.
-
 Offer discovery is a Buzz concern. Payment execution is a wallet concern.
 
-A profile may advertise a general offer. A private channel may distribute a scoped
-offer only to members. A paid resource may create a purpose-specific offer. The
-exact Nostr event schema will be documented in a separate NIP.
-
-Once the embedded wallet requirements are met, especially the requirement that
-every user has a BOLT 12 wallet that can immediately receive Bitcoin, Buzz's
+Once every user has a wallet that can immediately receive Bitcoin, Buzz's
 protocol surface stays small: broadcast and discover users' BOLT 12 offers on
 Nostr as profile metadata. A forthcoming NIP will specify this receive metadata,
-letting product features compose on top of the same stable receive primitive. A
-forthcoming NIP will also specify a BOLT 12-based zap protocol that replaces
+letting product features compose on top of the same stable receive primitive. 
+
+A forthcoming NIP will also specify a BOLT 12-based zap protocol that replaces
 NIP-57's LNURL-based zap mechanism without adding new trust assumptions.
 
 ---
@@ -460,57 +345,6 @@ Open-source software. Open-source communications. Open-source intelligence.
 Open-source money.
 
 Value moves with the work.
-
----
-
-## FAQ
-
-### Why Bitcoin and not stablecoins?
-
-Bitcoin is internet-native money that introduces the least amount of trust in
-third parties and the lowest cost for transfers of tiny amounts. Stablecoins
-require trust in the stablecoin issuer and in the crypto rails on which the
-stablecoins are sent and received. With Bitcoin, particularly through a
-self-custodial wallet, users can know their funds are their own instead of a claim
-on an issuer.
-
-### Why not Lightning Address / LNURL?
-
-LNURL gives Lightning users a Lightning Address: a stable address at which they
-can receive Bitcoin. That is useful, but it requires a web server and usually
-introduces another third party to operate, observe, or be trusted in the receive
-flow.
-
-BOLT 12 is a trustless way to achieve a stable receive identifier. Several Nostr
-clients have already built Lightning payment experiences with LNURL. Buzz should
-build around the more trustless BOLT 12 architecture from the beginning.
-
-### Why Lexe?
-
-Lexe was chosen as the initial embedded wallet provider because it meets the core
-starting requirements: an SDK with BOLT 12 send, BOLT 12 receive, small incoming
-payment support, and receive while the user's Buzz client is offline.
-
-As more embedded wallet alternatives become feasible, they should be added as
-user-selectable options in Buzz. Once a wallet connection protocol exists that
-lets users connect an existing wallet with the same capabilities, Buzz should
-support that too.
-
----
-
-## Prototype
-
-A prototype Buzz client was created that integrates a wallet provider layer with
-Lexe as the default embedded wallet, while also experimenting with Cashu and MDK
-wallets. As this vision document argues, the prototype uses BOLT 12 as the core
-primitive to demonstrate product features where value, in the form of small
-amounts of Bitcoin, can flow alongside work in Buzz.
-
-The prototype walkthroughs were put together by Spiral PM
-[matbalez](https://github.com/matbalez):
-
-- [Bitcoin in Buzz (née Sprout) — initial feature exploration](https://www.loom.com/share/f9323cfde3a7419ab82a8efdfa5282f3)
-- [Bitcoin in Buzz — hive channels](https://www.loom.com/share/ebfcf339dcb2431aa3a40ba242145437)
 
 ---
 
